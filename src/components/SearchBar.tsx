@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Calendar, Users, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -11,14 +12,17 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('2');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const navigate = useNavigate();
 
   const suggestions = [
-    'New York, USA',
-    'London, UK',
-    'Paris, France',
-    'Tokyo, Japan',
-    'Dubai, UAE',
-    'Bangkok, Thailand'
+    { city: 'New York', country: 'USA', hotels: '2,450+ hotels', avgPrice: '$299' },
+    { city: 'London', country: 'UK', hotels: '1,890+ hotels', avgPrice: '$245' },
+    { city: 'Paris', country: 'France', hotels: '1,650+ hotels', avgPrice: '$189' },
+    { city: 'Tokyo', country: 'Japan', hotels: '2,100+ hotels', avgPrice: '$156' },
+    { city: 'Dubai', country: 'UAE', hotels: '980+ hotels', avgPrice: '$320' },
+    { city: 'Bangkok', country: 'Thailand', hotels: '1,200+ hotels', avgPrice: '$89' },
+    { city: 'Mumbai', country: 'India', hotels: '1,450+ hotels', avgPrice: '$65' },
+    { city: 'Singapore', country: 'Singapore', hotels: '850+ hotels', avgPrice: '$198' }
   ];
 
   const handleDestinationChange = (value: string) => {
@@ -28,10 +32,25 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(destination);
+    if (destination.trim()) {
+      onSearch(destination);
+      navigate(`/search?destination=${encodeURIComponent(destination)}&checkin=${checkIn}&checkout=${checkOut}&guests=${guests}`);
+    }
     setShowSuggestions(false);
   };
 
+  const handleSuggestionClick = (suggestion: typeof suggestions[0]) => {
+    const fullDestination = `${suggestion.city}, ${suggestion.country}`;
+    setDestination(fullDestination);
+    setShowSuggestions(false);
+    onSearch(fullDestination);
+    navigate(`/search?destination=${encodeURIComponent(fullDestination)}&checkin=${checkIn}&checkout=${checkOut}&guests=${guests}`);
+  };
+
+  const filteredSuggestions = suggestions.filter(s => 
+    s.city.toLowerCase().includes(destination.toLowerCase()) ||
+    s.country.toLowerCase().includes(destination.toLowerCase())
+  );
   return (
     <div className="w-full max-w-4xl mx-auto">
       <form onSubmit={handleSearch} className="bg-white rounded-2xl shadow-2xl p-6 backdrop-blur-sm bg-white/95">
@@ -49,21 +68,38 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
               />
               {showSuggestions && (
                 <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 mt-1">
-                  {suggestions
-                    .filter(s => s.toLowerCase().includes(destination.toLowerCase()))
-                    .map((suggestion, index) => (
+                  {filteredSuggestions.map((suggestion, index) => (
                       <button
                         key={index}
                         type="button"
-                        onClick={() => {
-                          setDestination(suggestion);
-                          setShowSuggestions(false);
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors duration-150"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors duration-150 border-b border-gray-100 last:border-b-0"
                       >
-                        {suggestion}
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <div className="font-medium text-gray-900">
+                              {suggestion.city}, {suggestion.country}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {suggestion.hotels}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-blue-600">
+                              from {suggestion.avgPrice}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              per night
+                            </div>
+                          </div>
+                        </div>
                       </button>
                     ))}
+                  {filteredSuggestions.length === 0 && destination && (
+                    <div className="px-4 py-3 text-gray-500 text-center">
+                      No destinations found. Try searching for a city or country.
+                    </div>
+                  )}
                 </div>
               )}
             </div>

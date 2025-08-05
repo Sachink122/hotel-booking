@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import SearchBar from './components/SearchBar';
 import HotelComparison from './components/HotelComparison';
 import WhyChooseUs from './components/WhyChooseUs';
 import Testimonials from './components/Testimonials';
 import TrustSignals from './components/TrustSignals';
 import FloatingAIButton from './components/FloatingAIButton';
+import SearchResults from './pages/SearchResults';
+import HotelDetails from './pages/HotelDetails';
+import BookingPage from './pages/BookingPage';
 
-function App() {
+const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = (query: string) => {
@@ -149,6 +153,17 @@ function App() {
       {/* Floating AI Assistant */}
       <FloatingAIButton />
     </div>
+  );
+};
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/search" element={<SearchResults />} />
+      <Route path="/hotel/:id" element={<HotelDetails />} />
+      <Route path="/booking/:id" element={<BookingPage />} />
+    </Routes>
   );
 }
 

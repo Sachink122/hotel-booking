@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, MapPin, Wifi, Car, Coffee, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Hotel {
   id: number;
@@ -65,14 +66,14 @@ const hotels: Hotel[] = [
 ];
 
 const HotelComparison: React.FC = () => {
+  const navigate = useNavigate();
+
   const handleBookDeal = (hotel: Hotel, bestDeal: Hotel['prices'][0]) => {
-    // In a real app, this would redirect to the booking platform
-    alert(`Redirecting to ${bestDeal.platform} to book ${hotel.name} for $${bestDeal.price}/night`);
+    navigate(`/booking/${hotel.id}?platform=${encodeURIComponent(bestDeal.platform)}&price=${bestDeal.price}`);
   };
 
   const handleViewDetails = (hotel: Hotel) => {
-    // In a real app, this would show a detailed modal or navigate to hotel details page
-    alert(`Viewing details for ${hotel.name}\n\nLocation: ${hotel.location}\nRating: ${hotel.rating}/5 (${hotel.reviews} reviews)\nAmenities: ${hotel.amenities.join(', ')}`);
+    navigate(`/hotel/${hotel.id}`);
   };
 
   const getLowestPrice = (prices: Hotel['prices']) => {
